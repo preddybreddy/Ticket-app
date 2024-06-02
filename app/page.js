@@ -1,14 +1,27 @@
 import TicketCard from "./(components)/TicketCard";
+const getTickets = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/api/Tickets", {
+      method: "GET",
+      cache: "no-store",
+    });
 
-const Dasboard = () => {
+    if (!res.ok) {
+      throw new Error("Failed to fetch Tickets");
+    }
+
+    return res.json();
+  } catch (error) {
+    console.log("Error in fetching tickets from db", error);
+  }
+};
+const Dasboard = async () => {
+  const { allTickets } = await getTickets();
+  console.log(allTickets);
   return (
     <div className="lg: grid grid-cols-2 xl:grid-cols-4 sm:grid grid-cols-1">
-      <TicketCard />
-      <TicketCard />
-
-      <TicketCard />
-      <TicketCard />
-      <TicketCard />
+      {allTickets.length > 0 &&
+        allTickets.map((x, _i) => <TicketCard ticket={x} key={_i} />)}
     </div>
   );
 };
