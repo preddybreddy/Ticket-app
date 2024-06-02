@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const CreateTicket = () => {
+const CreateTicket = ({ id, ticket }) => {
   const router = useRouter();
-  const startingFormData = {
+  const EDITMODE = id == "new" ? false : true;
+  let startingFormData = {
     title: "test",
     description: "test",
     priority: 1,
@@ -12,9 +13,19 @@ const CreateTicket = () => {
     category: "Hardware Problem",
     progress: 0,
   };
+  if (EDITMODE) {
+    startingFormData.title = ticket.title;
+    startingFormData.description = ticket.description;
+    startingFormData.priority = ticket.priority;
+    startingFormData.status = ticket.status;
+    startingFormData.category = ticket.category;
+    startingFormData.progress = ticket.progress;
+  }
   const handleChange = (e) => {
     let property = e.target.name;
     let value = e.target.value;
+    console.log("State change triggered");
+    console.log(value);
     setFormData((prevState) => {
       let newState = { ...prevState, [property]: value };
       return newState;
@@ -22,15 +33,23 @@ const CreateTicket = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:3000/api/Tickets", {
-      method: "POST",
-      body: JSON.stringify({ formData }),
-      "content-type": "application/json",
-    });
-    console.log(JSON.stringify({ formData }));
-    console.log(res.status, res.ok);
+    let res;
+    if (!EDITMODE) {
+      res = await fetch("http://localhost:3000/api/Tickets", {
+        method: "POST",
+        body: JSON.stringify({ formData }),
+        "content-type": "application/json",
+      });
+    } else {
+      res = await fetch(`http://localhost:3000/api/Tickets/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ formData }),
+        "content-type": "application/json",
+      });
+      console.log("formDataUpdate", formData);
+    }
     if (!res.ok) {
-      throw new Error("Could not submit ticket");
+      throw new Error("Error in processing ticket");
     } else {
       //router.refresh();
       router.push("/");
@@ -45,7 +64,7 @@ const CreateTicket = () => {
         method="post"
         onSubmit={handleSubmit}
       >
-        <h4>Create Ticket</h4>
+        <h4>{EDITMODE ? "Update Ticket" : "Create Ticket"}</h4>
         <label>Title</label>
         <input
           type="text"
@@ -134,7 +153,7 @@ const CreateTicket = () => {
         </select>
         <div className="flex justify-start">
           <button type="submit" className="bg-slate-400 w-full">
-            Create Ticket
+            {EDITMODE ? "Update Ticket" : "Create Ticket"}
           </button>
         </div>
       </form>

@@ -17,7 +17,6 @@ const getTickets = async () => {
 };
 const Dasboard = async () => {
   const { allTickets } = await getTickets();
-  console.log(allTickets);
   return (
     <div className="lg: grid grid-cols-2 xl:grid-cols-4 sm:grid grid-cols-1">
       {allTickets.length > 0 &&
